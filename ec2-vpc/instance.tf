@@ -6,6 +6,29 @@ resource "aws_instance" "my-ec2" {
   key_name = "${aws_key_pair.mykeypair.key_name}"
   vpc_security_group_ids = ["${aws_security_group.allow-ssh.id}", "${aws_security_group.allow-http.id}"]
 
+  provisioner "file" {
+    source = "script.sh"
+    destination = "/tmp/script.sh"
+
+    connection {
+      user = "ubuntu"
+      private_key = "${file("mykey")}"
+    }
+  }
+
+  provisioner "remote-exec" {
+    inline = ["chmod +x /tmp/script.sh", "/tmp/script.sh"]
+
+    connection {
+      user = "ubuntu"
+      private_key = "${file("mykey")}"
+    }
+  }
+
+  provisioner "local-exec" {
+    command = "echo ${aws_instance.my-ec2.public_ip} >> public_ips.txt"
+  }
+
   tags {
     creted_by = "terraform"
   }
@@ -57,4 +80,8 @@ resource "aws_security_group" "allow-http" {
   tags {
     name = "allow-ssh"
   }
+}
+
+output "ip" {
+  value = "${aws_instance.my-ec2.public_dns}"
 }
