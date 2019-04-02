@@ -15,6 +15,13 @@ resource "aws_subnet" "my-public-subnet" {
   availability_zone = "us-east-1a"
 }
 
+resource "aws_subnet" "my-private-subnet" {
+  cidr_block = "10.0.2.0/24"
+  vpc_id = "${aws_vpc.my-vpc.id}"
+  map_public_ip_on_launch = false
+  availability_zone = "us-east-1a"
+}
+
 resource "aws_route_table" "my-public-route-table" {
   vpc_id = "${aws_vpc.my-vpc.id}"
 
